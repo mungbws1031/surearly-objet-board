@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Surearly Objet V02 — 5보드 실측 배치</title>
+<style>
+  :root{ --su-red:#E60044; --su-gray:#727171; --bg:#141414; --card:#1e1e1e; }
+  *{box-sizing:border-box;}
+  body{background:var(--bg);color:#eee;font-family:-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;margin:0;padding:24px;}
+  h1{font-size:1.1rem;margin:0 0 4px;}
+  .sub{color:#aaa;font-size:0.83rem;margin-bottom:16px;line-height:1.55;}
+  .wrap{max-width:1150px;margin:0 auto;}
+  svg{width:100%;height:auto;display:block;background:#0f0f0f;border-radius:12px;border:1px solid #333;}
+  .legend{display:flex;flex-wrap:wrap;gap:10px 18px;margin-top:14px;font-size:11px;color:#ccc;}
+  .legend span{display:inline-flex;align-items:center;gap:6px;}
+  .dot{width:10px;height:10px;border-radius:3px;display:inline-block;}
+  .notes{margin-top:16px;font-size:11px;color:#999;line-height:1.7;}
+  .notes b{color:#ddd;}
+  .est{color:#F5A623;font-weight:700;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Surearly Objet V02 (260710) — 5보드 실측 배치도</h1>
+  <div class="sub">
+    <b>DXF 좌표 그대로</b> 5개 부품 클러스터를 실측 위치·비율로 배치함(1 unit = 1mm). 회로도가 아니라 <b>PADS 배치 좌표</b> 기반이라
+    이전 회로도 기반 추정과 결과가 다름 — 특히 PCB-Board(전원부)와 LED-Board(광원+검출 통합)는 실측으로 확정된 것.
+  </div>
+
+<svg viewBox="-60 -50 300 210" xmlns="http://www.w3.org/2000/svg">
+  <g stroke="#222" stroke-width="0.3">
+    <line x1="-60" y1="0" x2="240" y2="0"/>
+    <line x1="0" y1="-50" x2="0" y2="160"/>
+  </g>
+
+  <g stroke="#555" stroke-width="0.6" fill="none" stroke-dasharray="2 1.5">
+    <path d="M 9 28 L 76 20"/>
+    <path d="M 0 80 L -10 55 L -15 28" stroke="#F5A623"/>
+    <path d="M 130 20 L 150 40 L 91 66"/>
+    <path d="M 130.5 20 L 168.3 20" stroke="#888"/>
+  </g>
+  <g font-size="4.2" fill="#8fd6ff" font-weight="600">
+    <text x="20" y="24">J1/J2</text>
+    <text x="-38" y="52" fill="#F5A623">J14(추정 경로)</text>
+    <text x="105" y="45">J7/J8↔J9(추정 페어링)</text>
+    <text x="140" y="17" fill="#888">근접 배치(정확한 커넥터 페어 미확인)</text>
+  </g>
+
+  <!-- Main-Board -->
+  <rect x="76" y="-2.5" width="54.5" height="46.5" rx="1" fill="#1e1e1e" stroke="#2D6CDF" stroke-width="1"/>
+  <text x="79" y="6" font-size="6" font-weight="700" fill="#fff">① Main-Board</text>
+  <text x="79" y="12" font-size="4" fill="#aaa">MCU + 로컬레귤레이터 + 부저</text>
+  <text x="79" y="19" font-size="4" fill="#ddd">U2 STM32U599VIT6</text>
+  <text x="79" y="24" font-size="4" fill="#ddd">U3~U7, Y1/Y2 크리스털</text>
+  <text x="79" y="29" font-size="4" fill="#ddd">BZ1 부저 · J3~J8</text>
+  <text x="79" y="41" font-size="3.5" fill="#666">54.5×46.5mm</text>
+
+  <!-- Power/PCB-Board -->
+  <rect x="168.3" y="-3" width="51.2" height="49" rx="1" fill="#1e1e1e" stroke="#E60044" stroke-width="1"/>
+  <text x="171" y="6" font-size="6" font-weight="700" fill="#fff">② PCB-Board(전원부)</text>
+  <text x="171" y="12" font-size="4" fill="#aaa">충전 · 승압 · USB</text>
+  <text x="171" y="19" font-size="4" fill="#ddd">U13 BQ24075(충전)</text>
+  <text x="171" y="24" font-size="4" fill="#ddd">U14 TPS27081, U15 TLV61048</text>
+  <text x="171" y="29" font-size="4" fill="#ddd">J10 USB, J11 배터리, SW2</text>
+  <text x="171" y="44" font-size="3.5" fill="#666">51.2×49mm</text>
+
+  <!-- LCD-Board -->
+  <rect x="-29" y="16" width="38.1" height="24.2" rx="1" fill="#1e1e1e" stroke="#C2410C" stroke-width="1"/>
+  <text x="-26" y="21" font-size="5.2" font-weight="700" fill="#fff">③ LCD-Board</text>
+  <text x="-26" y="26" font-size="4" fill="#ddd">U1 BoT-nLE512(BLE)</text>
+  <text x="-26" y="31" font-size="4" fill="#ddd">LCD SPI, Q1, R1~R6</text>
+  <text x="-26" y="38" font-size="3.5" fill="#666">38.1×24.2mm</text>
+
+  <!-- Button-Board -->
+  <rect x="-7" y="77.3" width="7" height="5.2" rx="0.5" fill="#1e1e1e" stroke="#7B5FC0" stroke-width="0.8"/>
+  <text x="-30" y="90" font-size="5.2" font-weight="700" fill="#fff">④ Button-Board</text>
+  <text x="-30" y="96" font-size="4" fill="#ddd">SW1 + J14 (7×5.2mm, 초소형)</text>
+  <line x1="-3.5" y1="82.5" x2="-25" y2="88" stroke="#7B5FC0" stroke-width="0.5"/>
+
+  <!-- LED-Board -->
+  <rect x="63" y="66" width="56" height="30.3" rx="1" fill="#1e1e1e" stroke="#C77800" stroke-width="1"/>
+  <text x="66" y="72" font-size="5.5" font-weight="700" fill="#fff">⑤ LED-Board (광원+검출 통합)</text>
+  <text x="66" y="78" font-size="4" fill="#ddd">D2~D8 UV-LED×7 (365nm)</text>
+  <text x="66" y="83" font-size="4" fill="#ddd">D9~D15 포토다이오드×7</text>
+  <text x="66" y="88" font-size="4" fill="#ddd">U9 TLC5916, U8/U10/U11/U12 OPA4397×4</text>
+  <text x="66" y="93" font-size="3.5" fill="#666">56×30.3mm · J9</text>
+
+</svg>
+
+  <div class="legend">
+    <span><i class="dot" style="background:#2D6CDF"></i>Main(MCU)</span>
+    <span><i class="dot" style="background:#E60044"></i>Power(충전/승압)</span>
+    <span><i class="dot" style="background:#C2410C"></i>LCD+BLE</span>
+    <span><i class="dot" style="background:#7B5FC0"></i>Button</span>
+    <span><i class="dot" style="background:#C77800"></i>LED+PD 통합광학</span>
+  </div>
+
+  <div class="notes">
+    <b>확정(DXF 실측):</b> 5개 클러스터 bbox·부품 레퍼런스 전부 좌표로 확인. Bottom-side 부품(PART_NAME_04 레이어) 포함해서 재검증함.<br>
+    <b>추정(DXF만으론 확인 불가):</b> 커넥터 <span class="est">페어링(어느 J가 어느 J와 실제로 연결되는지)</span>은 배치 좌표만으론 못 확인 — 이건 넷리스트나 케이블 BOM 확인 필요. 위 그림의 J1/J2·J7/J8↔J9·J14 연결선은 "근접 배치+회로도 신호명" 기반 추정.<br>
+    <b>Main↔Power 사이 커넥터</b>는 위치가 붙어있어서(x130.5→168.3, 38mm 갭) 케이블 연결로 보이나 정확히 어느 J넘버인지 회로도에서도 명확히 안 나와 있어 확인 필요.<br>
+    거버 원본(zip)까지 있으면 카파 트레이스로 실제 커넥터 페어링 검증 가능함.
+  </div>
+</div>
+</body>
+</html>
