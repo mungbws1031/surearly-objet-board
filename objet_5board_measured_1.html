@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Surearly Objet V02 — 5보드 실측 배치</title>
+<style>
+  :root{ --su-red:#E60044; --su-gray:#727171; --bg:#141414; --card:#1e1e1e; }
+  *{box-sizing:border-box;}
+  body{background:var(--bg);color:#eee;font-family:-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;margin:0;padding:24px;}
+  h1{font-size:1.1rem;margin:0 0 4px;}
+  .sub{color:#aaa;font-size:0.83rem;margin-bottom:16px;line-height:1.55;}
+  .wrap{max-width:1150px;margin:0 auto;}
+  svg{width:100%;height:auto;display:block;background:#0f0f0f;border-radius:12px;border:1px solid #333;}
+  .legend{display:flex;flex-wrap:wrap;gap:10px 18px;margin-top:14px;font-size:11px;color:#ccc;}
+  .legend span{display:inline-flex;align-items:center;gap:6px;}
+  .dot{width:10px;height:10px;border-radius:3px;display:inline-block;}
+  .detail-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:16px;}
+  .card{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;padding:10px 12px;font-size:11.5px;line-height:1.6;}
+  .card h3{margin:0 0 6px;font-size:12.5px;}
+  .card ul{margin:0;padding-left:16px;color:#ccc;}
+  .card ul li{margin-bottom:2px;}
+  .notes{margin-top:16px;font-size:11px;color:#999;line-height:1.7;}
+  .notes b{color:#ddd;}
+  .est{color:#F5A623;font-weight:700;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Surearly Objet V02 (260710) — 5보드 실측 배치도 (v2)</h1>
+  <div class="sub">
+    <b>DXF 좌표 그대로</b> 5개 부품 클러스터를 실측 위치·비율로 배치함(1 unit = 1mm). 회로도가 아니라 <b>PADS 배치 좌표</b> 기반이라
+    이전 회로도 기반 추정과 결과가 다름. 박스 안엔 레퍼런스만 짧게 표기하고, 상세 부품명은 아래 카드에서 확인.
+  </div>
+
+<svg viewBox="-60 -50 300 210" xmlns="http://www.w3.org/2000/svg">
+  <g stroke="#222" stroke-width="0.3">
+    <line x1="-60" y1="0" x2="240" y2="0"/>
+    <line x1="0" y1="-50" x2="0" y2="160"/>
+  </g>
+
+  <g stroke="#555" stroke-width="0.6" fill="none" stroke-dasharray="2 1.5">
+    <path d="M 9 28 L 76 20"/>
+    <path d="M 0 80 L -10 55 L -15 28" stroke="#F5A623"/>
+    <path d="M 130 20 L 150 40 L 91 66"/>
+    <path d="M 130.5 20 L 168.3 20" stroke="#888"/>
+  </g>
+  <g font-size="4" fill="#8fd6ff" font-weight="600">
+    <text x="22" y="24">J1/J2</text>
+    <text x="-40" y="52" fill="#F5A623" font-size="3.3">J14(추정)</text>
+    <text x="98" y="47" font-size="3.3">J7/J8↔J9(추정)</text>
+  </g>
+
+  <!-- Main-Board -->
+  <rect x="76" y="-2.5" width="54.5" height="46.5" rx="1" fill="#1e1e1e" stroke="#2D6CDF" stroke-width="1"/>
+  <text x="79" y="7" font-size="5.5" font-weight="700" fill="#fff">① Main-Board</text>
+  <text x="79" y="14" font-size="3.6" fill="#ddd">U2, U3~U7, Y1, Y2</text>
+  <text x="79" y="19.5" font-size="3.6" fill="#ddd">BZ1, J3~J8</text>
+  <text x="79" y="41" font-size="3.2" fill="#666">54.5×46.5mm</text>
+
+  <!-- Power/PCB-Board -->
+  <rect x="168.3" y="-3" width="51.2" height="49" rx="1" fill="#1e1e1e" stroke="#E60044" stroke-width="1"/>
+  <text x="171" y="7" font-size="5.5" font-weight="700" fill="#fff">② PCB-Board</text>
+  <text x="171" y="14" font-size="3.6" fill="#aaa">(전원부)</text>
+  <text x="171" y="20.5" font-size="3.6" fill="#ddd">U13, U14, U15</text>
+  <text x="171" y="26" font-size="3.6" fill="#ddd">J10, J11, SW2</text>
+  <text x="171" y="44" font-size="3.2" fill="#666">51.2×49mm</text>
+
+  <!-- LCD-Board -->
+  <rect x="-29" y="16" width="38.1" height="22.5" rx="1" fill="#1e1e1e" stroke="#C2410C" stroke-width="1"/>
+  <text x="-27" y="21.5" font-size="4.6" font-weight="700" fill="#fff">③ LCD-Board</text>
+  <text x="-27" y="27" font-size="3.5" fill="#ddd">U1, LCD, Q1</text>
+  <text x="-27" y="32" font-size="3.5" fill="#ddd">R1~R6, BD1</text>
+  <text x="-27" y="37.5" font-size="3.2" fill="#666">38.1×22.5mm</text>
+
+  <!-- Button (panel-mount, not a real board) -->
+  <circle cx="-3.5" cy="80" r="1.2" fill="none" stroke="#7B5FC0" stroke-width="0.8"/>
+  <text x="-35" y="70" font-size="4.6" font-weight="700" fill="#fff">④ Button</text>
+  <text x="-35" y="76" font-size="3.5" fill="#ddd">SW1, J14</text>
+  <text x="-35" y="81" font-size="3.2" fill="#F5A623">패널마운트 추정(독립PCB 아닐 수도)</text>
+  <line x1="-3.5" y1="79.9" x2="-15" y2="76" stroke="#7B5FC0" stroke-width="0.5"/>
+
+  <!-- LED-Board -->
+  <rect x="63" y="66" width="56" height="26" rx="1" fill="#1e1e1e" stroke="#C77800" stroke-width="1"/>
+  <text x="66" y="73" font-size="4.8" font-weight="700" fill="#fff">⑤ LED-Board</text>
+  <text x="66" y="80" font-size="3.6" fill="#ddd">D2~D8, D9~D15</text>
+  <text x="66" y="86" font-size="3.6" fill="#ddd">U8,U9,U10,U11,U12</text>
+  <text x="66" y="90.5" font-size="3.2" fill="#666">53.0×26.0mm · J9</text>
+
+</svg>
+
+  <div class="legend">
+    <span><i class="dot" style="background:#2D6CDF"></i>Main(MCU)</span>
+    <span><i class="dot" style="background:#E60044"></i>Power(충전/승압)</span>
+    <span><i class="dot" style="background:#C2410C"></i>LCD+BLE</span>
+    <span><i class="dot" style="background:#7B5FC0"></i>Button</span>
+    <span><i class="dot" style="background:#C77800"></i>LED+PD 통합광학</span>
+  </div>
+
+  <div class="detail-grid">
+    <div class="card">
+      <h3 style="color:#2D6CDF">① Main-Board</h3>
+      <ul>
+        <li>U2 — STM32U599VIT6 (MCU)</li>
+        <li>Y2 — SX-32, 16MHz 메인클럭</li>
+        <li>Y1 — CS-3215, 32.768kHz (RTC용)</li>
+        <li>U4/U5 — MCP79410-ISN(RTC) / M24C32-RMN6TP(EEPROM)</li>
+        <li>U6 — MX25L3273FM2I-08G-TR (QSPI 플래시)</li>
+        <li>U3 — TLV840MADL29DBVR (로컬 LDO)</li>
+        <li>U7 — TLV75733PDBVR (3.3V LDO)</li>
+        <li>BZ1 — LET4020S-03L (부저), J3~J8</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 style="color:#E60044">② PCB-Board (전원부)</h3>
+      <ul>
+        <li>U13 — BQ24075RGTR (Li-ion 충전)</li>
+        <li>U14 — TPS27081ADDCR (로드 스위치)</li>
+        <li>U15 — TLV61048DBV (부스트 컨버터)</li>
+        <li>J10 — USB4940, J11 — 배터리(53261-02)</li>
+        <li>SW2, L1(2.2µH), D18(SS34FA)</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 style="color:#C2410C">③ LCD-Board</h3>
+      <ul>
+        <li>U1 — BLE 모듈 <span class="est">(회로도=BoT-nLE512 / 데이터시트=BoT-nLE521, 불일치 확인 필요)</span></li>
+        <li>LCD — ZT020Q01, 2.0" TFT 4-wire SPI</li>
+        <li>Q1 — MMBT2222A</li>
+        <li>BD1, R1~R6 — 보호다이오드·지지저항</li>
+        <li>J1/J2 — Main-Board行 FFC</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 style="color:#7B5FC0">④ Button (패널마운트 추정)</h3>
+      <ul>
+        <li>SW1 — B3U-1000P (택트 버튼)</li>
+        <li>J14 — 53398-02</li>
+        <li><span class="est">SW1·J14 좌표가 0.92mm 차이로 사실상 같은 지점 — 독립 PCB가 아니라 와이어로 연결된 패널마운트 스위치일 가능성 높음</span></li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 style="color:#C77800">⑤ LED-Board (광원+검출 통합)</h3>
+      <ul>
+        <li>D2~D8 — VLMU1610-365-135 ×7 (365nm UV-LED)</li>
+        <li>U9 — TLC5916IPW (정전류 LED 드라이버)</li>
+        <li>D9~D15 — VEMD2503X01 ×7 (포토다이오드)</li>
+        <li>U8,U10 — OPA4397PWR (1단 TIA, 200KΩF)</li>
+        <li>U11,U12 — OPA4397PWR (2단 게인, 19.1K/1KF)</li>
+        <li>J9 — Main-Board行 FFC</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="notes">
+    <b>확정(개별 보드 DXF 5개, 26.08.21 재검증):</b> 각 파일이 보드 하나와 정확히 1:1 대응 — 지난번 통합DXF 기반 매핑이 전부 정확했음을 재확인. 크기도 이 소스로 정밀화(LCD 38.1×22.5mm, LED 53.0×26.0mm로 소폭 수정).<br>
+    <span class="est">신규 발견:</span> Button-Board는 SW1·J14 좌표가 0.92mm 차이로 사실상 한 점 — 별도 리지드 PCB가 아니라 <b>와이어 연결 패널마운트 스위치</b>일 가능성이 높음. 확인 권장.<br>
+    <b>확정(DXF 실측):</b> 5개 클러스터 bbox·부품 레퍼런스 전부 좌표로 확인. Bottom-side 부품(PART_NAME_04 레이어) 포함해서 재검증함.<br>
+    <b>확정(거버 4개 카파레이어):</b> 이 보드는 <b>4층 PCB</b> (top / GND plane / VCC plane / bottom).<br>
+    <b>확정(데이터시트):</b> RTC=MCP79410-ISN, EEPROM=M24C32-RMN6TP, QSPI플래시=MX25L3273FM2I-08G-TR, LCD컨트롤러=ZT020Q01, Y2(메인클럭)=SX-32 16MHz, Y1(RTC클럭)=CS-3215 32.768kHz — 전부 이전엔 "레퍼런스 미확인"이었던 항목.<br>
+    <span class="est">정정(26.08.21):</span> 이전 '원형/타원형 가능성' 철회 — gerbonara로 fab레이어 Arc 63개 실측한 결과 전부 지름 0.2mm급 초소형 호(텍스트 글자의 둥근 획)로, 보드 외곽선이 될 수 없는 크기였음. 개별 보드 DXF 5개에도 외곽선 레이어는 없었지만, 이 결과로 <b>표준 사각형일 가능성이 원형보다 훨씬 높음</b>. 완전 확정은 거버뷰어로 직접 확인 필요.<br>
+    <span class="est">확인 필요:</span> BLE 모듈 파트넘버가 회로도(BoT-nLE512)와 데이터시트(BoT-nLE521)에서 다름 — 원본 확인 권장.<br>
+    <b>추정(여전히 미확인):</b> 커넥터 페어링(어느 J가 어느 J와 연결되는지)은 넷리스트 확인 필요.
+  </div>
+</div>
+</body>
+</html>
