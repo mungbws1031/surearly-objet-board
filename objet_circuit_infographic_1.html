@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>회로 인포그래픽</title>
+<style>
+  :root{
+    --su-red:#E60044; --su-gray:#727171;
+    --ink:#1f2328; --ink-soft:#5b636c; --line:#e3e6ea;
+    --bg:#f6f7f9; --card:#ffffff; --shadow:0 1px 3px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.05);
+    --copper:#c98a3a; --pad:#e0b75c;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+    line-height:1.55;padding:28px 18px 60px}
+  .wrap{max-width:1080px;margin:0 auto}
+  header.top{border-left:5px solid var(--su-red);padding:6px 0 6px 16px;margin-bottom:8px}
+  header.top h1{margin:0;font-size:24px;letter-spacing:-.01em}
+  header.top .sub{color:var(--ink-soft);font-size:13px;margin-top:2px}
+  .summary{background:var(--card);border:1px solid var(--line);border-radius:12px;
+    padding:16px 18px;margin:16px 0 20px;box-shadow:var(--shadow);font-size:15px}
+  .summary b{color:var(--su-red)}
+
+  .barrow{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin:24px 0 12px}
+  .barrow h2{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--su-gray);
+    margin:0;font-weight:700;margin-right:auto}
+  .viewtoggle{display:inline-flex;border:1px solid var(--line);border-radius:18px;overflow:hidden;background:#fff}
+  .viewtoggle button{font:inherit;font-size:12px;font-weight:600;padding:5px 14px;border:none;
+    background:#fff;color:var(--ink-soft);cursor:pointer}
+  .viewtoggle button.active{background:var(--su-red);color:#fff}
+  .playbtn{font:inherit;font-size:12px;font-weight:600;color:var(--su-red);background:#fff;
+    border:1px solid var(--su-red);border-radius:18px;padding:5px 13px;cursor:pointer;
+    display:inline-flex;align-items:center;gap:6px;line-height:1}
+  .playbtn .ic{width:9px;height:10px}
+
+  .viewbox{background:var(--card);border:1px solid var(--line);border-radius:12px;
+    padding:10px;box-shadow:var(--shadow);overflow-x:auto}
+  svg.stage{display:block;width:100%;height:auto;min-width:560px}
+  svg.stage[hidden]{display:none}
+
+  /* 노드(블록뷰) */
+  .node rect{rx:10;cursor:pointer;transition:filter .15s}
+  .node:hover rect{filter:brightness(.92)}
+  .node text{fill:#fff;font-size:13px;font-weight:600;pointer-events:none}
+  .node .nlbl{font-size:10px;opacity:.85;font-weight:500}
+  /* 패키지(보드뷰) */
+  .pkg{cursor:pointer}
+  .pkg:hover .pkg-body{filter:brightness(1.12)}
+  .pkg-body{stroke-width:1.5}
+  .pin{stroke:#cbb88f;stroke-width:2}
+  .silk{fill:#f3f6ff;font-size:12px;font-weight:700;pointer-events:none}
+  .silk-sub{fill:#9db4c7;font-size:8.5px;pointer-events:none}
+  .pad{fill:var(--pad)}
+  .trace{fill:none;stroke:var(--copper);stroke-linejoin:round;stroke-linecap:round}
+  .hotspot{cursor:pointer}
+
+  .flash{animation:flash 1.1s ease}
+  @keyframes flash{0%,100%{box-shadow:var(--shadow)}30%{box-shadow:0 0 0 4px var(--su-red)}}
+  .pulse-ring{fill:none;opacity:0;transform-box:fill-box;transform-origin:center;
+    animation:pulse 1.9s ease-out infinite}
+  @keyframes pulse{0%{opacity:.6;transform:scale(.6)}70%{opacity:0;transform:scale(1.18)}100%{opacity:0}}
+  .anim-off .pulse-ring{animation:none;opacity:0}
+  .led-glow{opacity:.28;transform-box:fill-box;transform-origin:center;animation:ledpulse 1.5s ease-in-out infinite}
+  .led-ray{opacity:.7;animation:ledpulse 1.5s ease-in-out infinite}
+  @keyframes ledpulse{0%,100%{opacity:.22}50%{opacity:.62;transform:scale(1.12)}}
+  .anim-off .led-glow,.anim-off .led-ray{animation:none}
+  .resistor text{pointer-events:none}
+
+  .legend{display:flex;flex-wrap:wrap;gap:14px 22px;margin:12px 2px 0;font-size:12px;color:var(--ink-soft)}
+  .legend .item{display:flex;align-items:center;gap:7px}
+  .legend svg{flex:none}
+  .legend .badge{display:inline-block;padding:1px 7px;border-radius:9px;border:1px dashed var(--su-gray);
+    color:var(--su-gray);font-size:11px;font-weight:600}
+  .legend .rdot{width:10px;height:10px;border-radius:50%;background:var(--su-gray);flex:none}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;
+    box-shadow:var(--shadow);display:flex;flex-direction:column}
+  .card .chead{padding:11px 14px;color:#fff;display:flex;align-items:center;gap:9px}
+  .card .chead .cat{margin-left:auto;font-size:10px;opacity:.85;letter-spacing:.06em;text-transform:uppercase}
+  .card .chead h3{margin:0;font-size:16px}
+  .card .chead .store{font-size:10px;background:rgba(255,255,255,.22);padding:1px 7px;border-radius:8px;font-weight:600}
+  .card .body{padding:13px 14px 15px}
+  .card .role{font-size:13.5px;font-weight:600;margin:0 0 5px}
+  .card .plain{font-size:13px;color:var(--ink-soft);margin:0 0 10px}
+  .parts-toggle{font-size:12px;color:var(--su-red);background:none;border:none;padding:4px 0;
+    cursor:pointer;font-weight:600;display:flex;align-items:center;gap:5px}
+  .parts-toggle .chev{transition:transform .2s}
+  .parts-toggle[aria-expanded="true"] .chev{transform:rotate(90deg)}
+  .parts{list-style:none;margin:6px 0 0;padding:0;display:none}
+  .parts.open{display:block}
+  .parts li{display:flex;align-items:baseline;gap:8px;padding:5px 0;border-top:1px solid var(--line);font-size:12.5px}
+  .parts li .ref{font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:700;color:var(--ink);min-width:34px}
+  .parts li .pv{color:var(--ink-soft)}
+  .est{display:inline-block;padding:0 6px;border-radius:8px;border:1px dashed var(--su-gray);
+    color:var(--su-gray);font-size:10px;font-weight:700;margin-left:4px;white-space:nowrap}
+  .est::before{content:"~ ";font-weight:700}
+
+  .notes{background:#fff8f0;border:1px solid #f0d9c0;border-radius:12px;padding:14px 16px;margin-top:14px}
+  .notes h3{margin:0 0 7px;font-size:13px;color:#a85a16}
+  .notes ul{margin:0;padding-left:18px;font-size:12.5px;color:#7a5a30}
+  .notes li{margin:3px 0}
+  .disclaimer{font-size:11.5px;color:var(--su-gray);margin:10px 2px 0}
+  footer{margin-top:26px;font-size:11px;color:var(--su-gray);text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top"><h1 id="t-title"></h1><div class="sub" id="t-meta"></div></header>
+  <div class="summary" id="t-summary"></div>
+
+  <div class="barrow">
+    <h2>전기 흐름</h2>
+    <span class="viewtoggle" id="viewtoggle">
+      <button data-v="bv" class="active" type="button">회로 보드</button>
+      <button data-v="blk" type="button">블록 다이어그램</button>
+    </span>
+    <button class="playbtn" id="playbtn" type="button"></button>
+  </div>
+  <div class="viewbox">
+    <svg class="stage" id="boardview" xmlns="http://www.w3.org/2000/svg"></svg>
+    <svg class="stage" id="blockview" hidden xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
+  <div class="legend" id="legend"></div>
+  <p class="disclaimer" id="disclaimer"></p>
+
+  <div class="barrow"><h2>기능 블록</h2></div>
+  <div class="grid" id="grid"></div>
+
+  <div id="notes-host"></div>
+  <footer>회로도 판독 기반 인포그래픽 · 보드 형상은 기능 흐름의 은유(실측 레이아웃 아님) · 애니메이션은 개념용(정량 시뮬 아님)</footer>
+</div>
+
+<script>
+/* ============================================================
+   STEP 2의 JSON을 DATA에 넣으면 됩니다.
+   확장 필드(선택):
+     flow.resistance : "low"|"med"|"high"   // 흐름 저항(상대 인상). 모르면 생략.
+     block.storage   : true                  // 에너지/데이터 체류(커패시터·배터리·메모리)
+   실제 보드 사진 모드(선택):
+     DATA.boardImage : "data:image/...;base64,..."  // 보드 배경 이미지
+     block.boardPos  : {x:0~100, y:0~100}            // 이미지상 % 좌표(없으면 자동배치)
+   아래는 양식화 보드 데모 데이터입니다.
+   ============================================================ */
+const DATA = {
+  title: "Surearly Objet V02 (260710) — 회로 블록 다이어그램 (v2, DXF 실측 반영)",
+  summary: "USB로 받은 5V를 <b>PCB-Board(전원부)</b>가 충전·승압해 <b>+5V/+3.3V</b>로 나누고, <b>Main-Board의 MCU(STM32U599)</b>가 <b>LED-Board</b>(UV-LED 7개+포토다이오드 7개+2단 증폭기가 <u>한 보드에 통합</u>)를 구동해 형광을 여기·검출한다. BLE+LCD는 LCD-Board, 버튼은 초소형 Button-Board로 분리.",
+  blocks: [
+    {id:"power", name:"전원부 — PCB-Board", category:"power", storage:true, role:"USB 5V→Li-ion 충전, VBAT→+5V/+3.3V 배분 (별도 물리보드, DXF 실측 확인)",
+      plain_explainer:"USB 전원으로 배터리를 충전하고, 배터리 전압을 승압/안정화해 다른 4개 보드에 나눠주는 '발전소'. 지난 버전에서는 이 부분을 Main-Board에 포함된 걸로 잘못 추정했는데, DXF 좌표 확인 결과 별도 보드(51.2×49mm)로 확정됨.",
+      key_parts:[{ref:"U13",type:"Li-ion 충전 IC",value:"BQ24075RGTR",confidence:"high"},
+                 {ref:"U15",type:"부스트 컨버터",value:"TLV61048DBV",confidence:"high"},
+                 {ref:"U14",type:"로드 스위치",value:"TPS27081ADDCR",confidence:"high"},
+                 {ref:"J10",type:"USB 커넥터",value:"USB4940",confidence:"high"},
+                 {ref:"J11",type:"배터리 커넥터",value:"53261-02",confidence:"high"}]},
+    {id:"mcu",   name:"MCU — Main-Board", category:"mcu", role:"전체 시스템 제어·ADC 판독 (54.5×46.5mm, DXF 실측)",
+      plain_explainer:"회로의 두뇌. 광검출 신호를 ADC로 읽고, LED 구동·BLE·LCD·버튼·부저를 총괄한다. RTC/EEPROM/QSPI는 데이터시트 확인으로 확정됨(이전 버전엔 추정이었음).",
+      key_parts:[{ref:"U2",type:"MCU",value:"STM32U599VIT6",confidence:"high"},
+                 {ref:"Y2",type:"메인 클럭 크리스털",value:"SX-32, 16MHz",confidence:"high"},
+                 {ref:"Y1",type:"RTC 클럭 크리스털",value:"CS-3215, 32.768kHz — 이전엔 메인클럭으로 오추정",confidence:"high"},
+                 {ref:"U4/U5",type:"RTC / EEPROM",value:"MCP79410-ISN / M24C32-RMN6TP",confidence:"high"},
+                 {ref:"U6",type:"QSPI 플래시",value:"MX25L3273FM2I-08G-TR",confidence:"high"},
+                 {ref:"U3",type:"로컬 LDO",value:"TLV840MADL29DBVR",confidence:"high"},
+                 {ref:"U7",type:"3.3V LDO",value:"TLV75733PDBVR — 회로도상 스위치PCB였으나 DXF 실측으론 Main-Board",confidence:"high"},
+                 {ref:"BZ1",type:"부저",value:"LET4020S-03L",confidence:"high"}]},
+    {id:"comm",  name:"BLE+LCD — LCD-Board", category:"comm", role:"MCU ↔ 스마트폰/PC 무선 통신 + 화면 표시 (같은 물리보드, 38.1×24.2mm)",
+      plain_explainer:"BLE 모듈과 LCD 연결부가 한 보드에 같이 있다 — 지난 추정과 달리 이번엔 실측으로 확정.",
+      key_parts:[{ref:"U1",type:"BLE 모듈(슬레이브)",value:"회로도=BoT-nLE512, 데이터시트=BoT-nLE521 — 파트넘버 불일치, 원본 확인 필요",confidence:"medium"},
+                 {ref:"-",type:"TFT LCD 2.0\" 4-wire SPI",value:"ZT020Q01 (데이터시트로 확정)",confidence:"high"},
+                 {ref:"Q1",type:"트랜지스터",value:"MMBT2222A",confidence:"high"},
+                 {ref:"BD1,R1~R6",type:"보호다이오드/지지저항",value:"-",confidence:"high"}]},
+    {id:"button",name:"버튼 — Button-Board", category:"io", role:"조작 스위치 (7×5.2mm, 초소형 독립보드)",
+      plain_explainer:"버튼 하나만 딸린 초소형 보드. LCD-Board에 케이블로 연결되는 걸로 추정(정확한 커넥터 페어링은 미확인).",
+      key_parts:[{ref:"SW1",type:"택트 버튼",value:"B3U-1000P",confidence:"high"},
+                 {ref:"J14",type:"커넥터",value:"53398-02",confidence:"high"}]},
+    {id:"light", name:"여기광부 — LED-Board", category:"light", lightColor:"#8A6BFF", role:"365nm UV-LED로 시료 여기 (광검출부와 같은 보드, 56×30.3mm)",
+      plain_explainer:"시료에 자외선을 쏴서 형광 반응을 일으키는 광원. 정전류 드라이버가 7개 LED 밝기를 균일하게 맞춘다. 광검출부(analog 블록)와 물리적으로 같은 보드 위에 있다 — 이게 이번 실측에서 새로 확정된 부분.",
+      key_parts:[{ref:"D2~D8",type:"UV-LED ×7",value:"VLMU1610-365-135 / 365nm",confidence:"high"},
+                 {ref:"U9",type:"정전류 LED 드라이버",value:"TLC5916 (SPI: SDI/CLK/LE/OE)",confidence:"high"}]},
+    {id:"analog",name:"광검출부 — LED-Board", category:"analog", role:"포토다이오드 신호를 2단 증폭해 MCU로 전달 (여기광부와 동일 보드)",
+      plain_explainer:"형광을 포토다이오드 7개로 받아, 아주 작은 전류를 1단(TIA)·2단(게인) 오피앰프로 증폭해 MCU가 읽을 수 있는 전압으로 만든다.",
+      key_parts:[{ref:"D9~D15",type:"포토다이오드 ×7",value:"VEMD2503",confidence:"high"},
+                 {ref:"U8,U10",type:"1단 TIA (쿼드 오피앰프)",value:"OPA4397, 피드백 200KΩF",confidence:"high"},
+                 {ref:"U11,U12",type:"2단 게인 (쿼드 오피앰프)",value:"OPA4397, 19.1K/1KF",confidence:"high"},
+                 {ref:"J9",type:"커넥터",value:"FFC, Main-Board行",confidence:"high"}]}
+  ],
+  flows: [
+    {from:"power",to:"mcu",label:"+3.3V (보드간 케이블)",kind:"power",resistance:"low"},
+    {from:"power",to:"comm",label:"+3.3V",kind:"power",resistance:"med"},
+    {from:"power",to:"button",label:"—",kind:"power",resistance:"high"},
+    {from:"power",to:"light",label:"+5V/+3.3V",kind:"power",resistance:"med"},
+    {from:"power",to:"analog",label:"+3.3V/+5V",kind:"power",resistance:"med"},
+    {from:"mcu",to:"comm",label:"UART2(BLE) / SPI3(LCD)",kind:"data"},
+    {from:"comm",to:"button",label:"로컬 연결(추정)",kind:"control",resistance:"high"},
+    {from:"mcu",to:"light",label:"SPI1 (LED_SCK/MOSI/LE/OE)",kind:"control",resistance:"med"},
+    {from:"light",to:"analog",label:"365nm 여기광 → 형광",kind:"optical"},
+    {from:"analog",to:"mcu",label:"PD_AD1~7 (ADC 입력, J9 FFC경유)",kind:"signal",resistance:"high"}
+  ],
+  connectors:[
+    {ref:"J10/J11",name:"USB/배터리",purpose:"PCB-Board(전원부) 외부 입력",confidence:"high"},
+    {ref:"J1/J2",name:"LCD-Board FFC",purpose:"LCD-Board ↔ Main-Board",confidence:"high"},
+    {ref:"J9",name:"LED-Board FFC",purpose:"LED-Board ↔ Main-Board",confidence:"high"},
+    {ref:"J14",name:"Button 커넥터",purpose:"Button-Board ↔ LCD-Board(추정)",confidence:"medium"}
+  ],
+  notes:[
+    "v3: 거버(Gerber)+데이터시트 zip 반영. RTC=MCP79410-ISN, EEPROM=M24C32-RMN6TP, QSPI=MX25L3273FM2I, LCD=ZT020Q01 전부 확정(이전 low confidence → high). Y1/Y2 크리스털 역할 정정(Y1=32.768kHz RTC용, Y2=16MHz 메인클럭 — 이전엔 반대로 추정).",
+    "U7(3.3V LDO)은 회로도 시트상 '스위치PCB'에 그려져 있었지만 DXF 실측 배치는 Main-Board — 회로도 시트 구성과 실제 물리보드가 다를 수 있다는 걸 보여주는 사례.",
+    "BLE 모듈 파트넘버 불일치 발견: 회로도 텍스트='BoT-nLE512', 데이터시트 폴더='BoT-nLE521'. 오타인지 리비전 차이인지 원본에서 확인 필요 — IVDR 문서화 전에 확정 권장.",
+    "거버 4개 카파레이어(1-top/2-gnd/3-vcc/4-bot) 확인 결과 4층 PCB로 확정.",
+    "거버 fab 레이어 좌표를 찍어보니 보드 외곽이 사각형이 아니라 원형/타원형에 가까운 구간이 있음(특히 광학보드로 추정되는 클러스터) — 지금까지의 5보드 다이어그램은 사각 박스로 단순화한 것이라 실제 외곽 형태와는 다를 수 있음. fab 레이어엔 텍스트/치수선도 섞여 있어 완전 확정은 아님.",
+    "커넥터 페어링(어느 J가 어느 J와 실제로 연결되는지)은 DXF·거버 좌표만으론 확정 불가 — 넷리스트 확인 필요. Button↔LCD 연결은 추정(medium confidence).",
+    "흐름 저항(resistance: low/med/high)은 판독 인상이며 실측 임피던스 아님. 정량 SPICE 시뮬레이션 아님.",
+    "보드 뷰 부품 배치는 기능 흐름 순서로 양식화한 것 — 실제 PCB 레이아웃은 별도 '5보드 실측 배치도' 탭 참고.",
+    "리비전 히스토리(26.03.05→26.07.07): RTC I2C 넷 추가(버그픽스), OPTIC 필터 추가·오피앰프 전원 분리, 스위치 PCB 신설, USB 보드 버그픽스(VIN-USB 연결 시 리플 발생 → 회로 변경, 스위치 제거)."
+  ]
+};
+/* ============================================================ */
+
+const COLORS={power:"#E60044",mcu:"#2D6CDF",analog:"#00897B",sensor:"#7B5FC0",
+  comm:"#0288D1",io:"#5E7C8B",display:"#C2410C",actuator:"#B26A00",
+  protection:"#727171",clock:"#9C27B0",memory:"#455A64",connector:"#37474F",light:"#C77800"};
+const TIER={power:0,sensor:0,connector:0,analog:1,mcu:1,memory:1,clock:1,protection:1,
+  comm:2,display:2,actuator:2,io:2,light:2};
+const FLOW={
+  power:  {color:"#E60044",dash:"none",   w:3.5,label:"전력"},
+  signal: {color:"#00897B",dash:"none",   w:2,  label:"신호"},
+  data:   {color:"#0288D1",dash:"9 5",    w:2,  label:"데이터(버스)"},
+  control:{color:"#B26A00",dash:"2 5",    w:2,  label:"제어"},
+  clock:  {color:"#9C27B0",dash:"11 3 3 3",w:2, label:"클럭"},
+  optical:{color:"#F5A623",dash:"3 6",    w:2.4,label:"빛(광학)"}
+};
+const RES={low:{speed:1.0,count:4,mark:"R↓"},med:{speed:0.62,count:3,mark:"R→"},high:{speed:0.34,count:2,mark:"R↑"}};
+const col=c=>COLORS[c]||"#555";
+const isEst=c=>c&&c!=="high";
+const reduceMotion=(()=>{try{return window.matchMedia("(prefers-reduced-motion: reduce)").matches;}catch(e){return false;}})();
+function esc(s){return String(s??"").replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));}
+
+/* 헤더/요약 */
+document.getElementById("t-title").textContent=DATA.title||"회로 인포그래픽";
+const estCount=DATA.blocks.reduce((n,b)=>n+(b.key_parts||[]).filter(p=>isEst(p.confidence)).length,0);
+document.getElementById("t-meta").textContent=
+  `기능 블록 ${DATA.blocks.length}개 · 흐름 ${DATA.flows.length}개`+(estCount?` · 추정 부품 ${estCount}개`:"");
+document.getElementById("t-summary").innerHTML=DATA.summary||"";
+document.getElementById("disclaimer").textContent=
+  "※ '회로 보드' 뷰의 부품 배치는 회로도로 알 수 없어 기능 흐름을 보드 모양으로 양식화한 것입니다(실제 PCB 레이아웃 아님). 흐름 입자는 방향·상대저항·체류를 보여주는 개념 시각화이며 전류·전압을 계산한 시뮬레이션이 아닙니다.";
+
+/* 흐름 마커 defs (공통 문자열) */
+function markerDefs(prefix){
+  let s=`<defs>`;
+  Object.entries(FLOW).forEach(([k,f])=>{
+    s+=`<marker id="${prefix}-ah-${k}" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L7,3 L0,6 Z" fill="${f.color}"/></marker>`;});
+  s+=`<filter id="${prefix}-glow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>`;
+  return s;
+}
+
+/* ========== 블록 다이어그램 뷰 ========== */
+const BLK={pos:{},svg:document.getElementById("blockview")};
+(function(){
+  const NW=150,NH=48,COLGAP=80,ROWGAP=24,PAD=22;
+  const tiers={};DATA.blocks.forEach(b=>{const t=TIER[b.category]??1;(tiers[t]=tiers[t]||[]).push(b);});
+  const tk=Object.keys(tiers).map(Number).sort((a,b)=>a-b);
+  let maxRows=0;tk.forEach(t=>maxRows=Math.max(maxRows,tiers[t].length));
+  tk.forEach((t,ci)=>{const list=tiers[t];const colH=list.length*NH+(list.length-1)*ROWGAP;
+    const fullH=maxRows*NH+(maxRows-1)*ROWGAP;const y0=PAD+(fullH-colH)/2;
+    list.forEach((b,ri)=>{BLK.pos[b.id]={x:PAD+ci*(NW+COLGAP),y:y0+ri*(NH+ROWGAP),w:NW,h:NH};});});
+  const W=PAD*2+tk.length*NW+(tk.length-1)*COLGAP,H=PAD*2+maxRows*NH+(maxRows-1)*ROWGAP;
+  BLK.svg.setAttribute("viewBox",`0 0 ${W} ${H}`);
+  let edges="",labels="",pulses="",nodes="";
+  DATA.flows.forEach((fl,i)=>{const a=BLK.pos[fl.from],b=BLK.pos[fl.to];if(!a||!b)return;
+    const f=FLOW[fl.kind]||FLOW.signal;let x1=a.x+a.w,y1=a.y+a.h/2,x2=b.x,y2=b.y+b.h/2;
+    if(b.x<a.x){x1=a.x;x2=b.x+b.w;}const mx=(x1+x2)/2;
+    edges+=`<path id="blk-edge-${i}" d="M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}" fill="none"
+      stroke="${f.color}" stroke-width="${f.w}" ${f.dash!=="none"?`stroke-dasharray="${f.dash}"`:""}
+      marker-end="url(#blk-ah-${fl.kind})" opacity=".85"/>`;
+    const r=fl.resistance&&RES[fl.resistance];const txt=esc(fl.label||"")+(r?`  ${r.mark}`:"");
+    if(txt.trim()){const ly=(y1+y2)/2-5,wpx=txt.length*6.4+14;
+      labels+=`<rect x="${mx-wpx/2}" y="${ly-9}" width="${wpx}" height="15" rx="7" fill="#fff" opacity=".93"/>
+        <text x="${mx}" y="${ly+2}" text-anchor="middle" font-size="10" fill="${f.color}" font-weight="600">${txt}</text>`;}});
+  DATA.blocks.forEach(b=>{if(!b.storage)return;const p=BLK.pos[b.id];
+    pulses+=`<circle class="pulse-ring" cx="${p.x+p.w/2}" cy="${p.y+p.h/2}" r="${p.w/2+8}" stroke="${col(b.category)}" stroke-width="3"/>`;});
+  DATA.blocks.forEach(b=>{const p=BLK.pos[b.id],c=col(b.category);
+    const store=b.storage?`<text x="${p.x+p.w-10}" y="${p.y+38}" text-anchor="end" font-size="9" fill="#fff" opacity=".9">⊙ 체류</text>`:"";
+    nodes+=`<g class="node" onclick="jump('${b.id}')"><rect x="${p.x}" y="${p.y}" width="${p.w}" height="${p.h}" fill="${c}"/>
+      <text x="${p.x+12}" y="${p.y+22}">${esc(b.name)}</text>
+      <text class="nlbl" x="${p.x+12}" y="${p.y+38}">${esc(b.category)}</text>${store}</g>`;});
+  BLK.svg.innerHTML=markerDefs("blk")+pulses+edges+`<g id="blk-particles"></g>`+labels+nodes;
+})();
+
+/* ========== 회로 보드 뷰 ========== */
+const BV={pos:{},svg:document.getElementById("boardview")};
+(function(){
+  const PW=128,PH=58,COLGAP=104,ROWGAP=46,PAD=46;
+  const hasImg=!!DATA.boardImage;
+  // 좌표: boardPos(%) 우선, 없으면 tier 자동배치
+  const tiers={};DATA.blocks.forEach(b=>{const t=TIER[b.category]??1;(tiers[t]=tiers[t]||[]).push(b);});
+  const tk=Object.keys(tiers).map(Number).sort((a,b)=>a-b);
+  let maxRows=0;tk.forEach(t=>maxRows=Math.max(maxRows,tiers[t].length));
+  const W=PAD*2+tk.length*PW+(tk.length-1)*COLGAP, H=PAD*2+maxRows*PH+(maxRows-1)*ROWGAP;
+  tk.forEach((t,ci)=>{const list=tiers[t];const colH=list.length*PH+(list.length-1)*ROWGAP;
+    const fullH=maxRows*PH+(maxRows-1)*ROWGAP;const y0=PAD+(fullH-colH)/2;
+    list.forEach((b,ri)=>{
+      let x,y;
+      if(b.boardPos){x=(b.boardPos.x/100)*W-PW/2;y=(b.boardPos.y/100)*H-PH/2;}
+      else{x=PAD+ci*(PW+COLGAP);y=y0+ri*(PH+ROWGAP);}
+      BV.pos[b.id]={x,y,w:PW,h:PH};});});
+  BV.svg.setAttribute("viewBox",`0 0 ${W} ${H}`);
+
+  // 보드 배경
+  let bg;
+  if(hasImg){
+    bg=`<image href="${esc(DATA.boardImage)}" x="0" y="0" width="${W}" height="${H}" preserveAspectRatio="xMidYMid slice"/>
+        <rect x="0" y="0" width="${W}" height="${H}" fill="#0a1f18" opacity=".18"/>`;
+  }else{
+    bg=`<rect x="0" y="0" width="${W}" height="${H}" rx="16" fill="#0e2f24"/>
+        <rect x="6" y="6" width="${W-12}" height="${H-12}" rx="12" fill="none" stroke="#1c5740" stroke-width="2"/>`;
+    // 마운팅 홀
+    [[PAD*0.5,PAD*0.5],[W-PAD*0.5,PAD*0.5],[PAD*0.5,H-PAD*0.5],[W-PAD*0.5,H-PAD*0.5]].forEach(([cx,cy])=>{
+      bg+=`<circle cx="${cx}" cy="${cy}" r="9" fill="#0a241b" stroke="#2a6b50" stroke-width="3"/>`;});
+  }
+
+  // 트레이스 라우팅 (가장자리 자동 선택 L자)
+  function route(f,t){
+    const fcx=f.x+f.w/2,fcy=f.y+f.h/2,tcx=t.x+t.w/2,tcy=t.y+t.h/2;
+    let sx,sy,ex,ey,d;
+    if(Math.abs(tcx-fcx)>=Math.abs(tcy-fcy)){
+      sx=fcx<tcx?f.x+f.w:f.x; sy=fcy; ex=fcx<tcx?t.x:t.x+t.w; ey=tcy; const mx=(sx+ex)/2;
+      d=`M${sx},${sy} H${mx} V${ey} H${ex}`;
+    }else{
+      sy=fcy<tcy?f.y+f.h:f.y; sx=fcx; ey=fcy<tcy?t.y:t.y+t.h; ex=tcx; const my=(sy+ey)/2;
+      d=`M${sx},${sy} V${my} H${ex} V${ey}`;
+    }
+    return {d,sx,sy,ex,ey};
+  }
+  let traces="",pads="",labels="",resistors="";
+  DATA.flows.forEach((fl,i)=>{const a=BV.pos[fl.from],b=BV.pos[fl.to];if(!a||!b)return;
+    const f=FLOW[fl.kind]||FLOW.signal;const rt=route(a,b);const optical=fl.kind==="optical";
+    // 광학 경로는 구리 트레이스/패드 없음(빛은 도체 안 탐). 전기 경로만 구리+패드.
+    if(!optical){
+      traces+=`<path class="trace" d="${rt.d}" stroke-width="${f.w+3.5}" opacity=".55"/>`;
+      pads+=`<circle class="pad" cx="${rt.sx}" cy="${rt.sy}" r="3.4"/><circle class="pad" cx="${rt.ex}" cy="${rt.ey}" r="3.4"/>`;
+    }
+    traces+=`<path id="bv-edge-${i}" class="flowline" d="${rt.d}" fill="none" stroke="${f.color}"
+      stroke-width="${f.w}" ${f.dash!=="none"?`stroke-dasharray="${f.dash}"`:""} opacity="${optical?.7:.9}"
+      marker-end="url(#bv-ah-${fl.kind})"/>`;
+    const r=fl.resistance&&RES[fl.resistance];
+    const mx=(rt.sx+rt.ex)/2,my=(rt.sy+rt.ey)/2;
+    // 직렬 저항 칩(SMD): resistance 있는 전기 경로 중점에
+    if(r&&!optical){const rw=22,rh=11;
+      resistors+=`<g class="resistor"><rect x="${mx-rw/2}" y="${my-rh/2}" width="${rw}" height="${rh}" rx="2" fill="#2a2522" stroke="#b9a06a" stroke-width="1"/>
+        <rect x="${mx-rw/2}" y="${my-rh/2}" width="4" height="${rh}" fill="#cdb986"/>
+        <rect x="${mx+rw/2-4}" y="${my-rh/2}" width="4" height="${rh}" fill="#cdb986"/>
+        <text x="${mx}" y="${my+3}" text-anchor="middle" font-size="7.5" fill="#f0e3c0" font-weight="700">R</text></g>`;}
+    const txt=esc(fl.label||"")+(r?`  ${r.mark}`:"");
+    if(txt.trim()){const lx=mx,ly=my-(r&&!optical?14:7),wpx=txt.length*6.2+12;
+      labels+=`<rect x="${lx-wpx/2}" y="${ly-8}" width="${wpx}" height="14" rx="7" fill="#06150f" opacity=".82"/>
+        <text x="${lx}" y="${ly+2}" text-anchor="middle" font-size="9.5" fill="${f.color}" font-weight="700">${txt}</text>`;}});
+
+  // 체류 맥동
+  let pulses="";
+  DATA.blocks.forEach(b=>{if(!b.storage)return;const p=BV.pos[b.id];
+    pulses+=`<circle class="pulse-ring" cx="${p.x+p.w/2}" cy="${p.y+p.h/2}" r="${p.w/2+10}" stroke="${col(b.category)}" stroke-width="3"/>`;});
+
+  // 부품 패키지
+  function pkg(b){
+    const p=BV.pos[b.id],c=col(b.category),cat=b.category;
+    const cx=p.x+p.w/2;
+    let inner="";
+    if(cat==="light"){
+      const lc=b.lightColor||"#F5A623";const lx=p.x+24,ly=p.y+p.h/2;
+      let rays="";for(let k=0;k<8;k++){const ang=k*Math.PI/4;
+        rays+=`<line class="led-ray" x1="${lx+Math.cos(ang)*13}" y1="${ly+Math.sin(ang)*13}" x2="${lx+Math.cos(ang)*20}" y2="${ly+Math.sin(ang)*20}" stroke="${lc}" stroke-width="1.6"/>`;}
+      inner=`<rect x="${p.x}" y="${p.y}" width="${p.w}" height="${p.h}" rx="5" class="pkg-body" fill="#15202a" stroke="${c}"/>
+        ${rays}<circle class="led-glow" cx="${lx}" cy="${ly}" r="15" fill="${lc}"/>
+        <circle class="led-core" cx="${lx}" cy="${ly}" r="8" fill="${lc}"/>
+        <circle cx="${lx}" cy="${ly}" r="8" fill="none" stroke="#fff" stroke-width="1" opacity=".55"/>`;
+    }else if(cat==="connector"){
+      inner=`<rect x="${p.x}" y="${p.y}" width="${p.w}" height="${p.h}" rx="6" class="pkg-body" fill="#9aa3ab" stroke="#5c656d"/>
+        <rect x="${p.x+8}" y="${p.y+10}" width="${p.w-16}" height="${p.h-20}" rx="3" fill="#c7ced3"/>`;
+    }else if(cat==="comm"){
+      // 안테나 패키지 + 지그재그 트레이스
+      inner=`<rect x="${p.x}" y="${p.y}" width="${p.w}" height="${p.h}" rx="6" class="pkg-body" fill="#13202b" stroke="${c}"/>
+        <polyline points="${p.x+14},${p.y+p.h-12} ${p.x+26},${p.y+12} ${p.x+38},${p.y+p.h-12} ${p.x+50},${p.y+12} ${p.x+62},${p.y+p.h-12}"
+          fill="none" stroke="${COLORS.comm}" stroke-width="2.2"/>`;
+    }else{
+      // 일반 IC: 핀 + 1번핀 도트
+      let pins="";const n=4,sp=p.h/(n+1);
+      for(let k=1;k<=n;k++){const py=p.y+sp*k;
+        pins+=`<line class="pin" x1="${p.x-7}" y1="${py}" x2="${p.x}" y2="${py}"/><line class="pin" x1="${p.x+p.w}" y1="${py}" x2="${p.x+p.w+7}" y2="${py}"/>`;}
+      inner=`${pins}<rect x="${p.x}" y="${p.y}" width="${p.w}" height="${p.h}" rx="5" class="pkg-body" fill="#15202a" stroke="${c}"/>
+        <circle cx="${p.x+9}" cy="${p.y+9}" r="2.6" fill="${c}"/>`;
+    }
+    const store=b.storage?`<text x="${p.x+p.w-8}" y="${p.y+p.h-7}" text-anchor="end" class="silk-sub" fill="${c}">⊙</text>`:"";
+    return `<g class="pkg" onclick="jump('${b.id}')">${inner}
+      <text class="silk" x="${cx}" y="${p.y+p.h/2-1}" text-anchor="middle">${esc(b.name)}</text>
+      <text class="silk-sub" x="${cx}" y="${p.y+p.h/2+13}" text-anchor="middle">${esc(cat)}</text>${store}</g>`;
+  }
+  let packages="";DATA.blocks.forEach(b=>{packages+=pkg(b);});
+
+  BV.svg.innerHTML=markerDefs("bv")+bg+pulses+traces+pads+resistors+`<g id="bv-particles"></g>`+labels+packages;
+})();
+
+/* ========== 입자 엔진 (두 뷰 공유) ========== */
+const Anim=(function(){
+  let particles=[],raf=0,last=0,playing=false,supported=true,prefix="bv";
+  function svgOf(p){return p==="bv"?BV.svg:BLK.svg;}
+  function build(p){
+    prefix=p;const svg=svgOf(p),pg=svg.querySelector("#"+p+"-particles");
+    if(!pg)return; pg.innerHTML="";particles=[];
+    DATA.flows.forEach((fl,i)=>{
+      const path=svg.querySelector("#"+p+"-edge-"+i);
+      if(!path||typeof path.getTotalLength!=="function"){supported=false;return;}
+      let len=0;try{len=path.getTotalLength();}catch(e){supported=false;return;}
+      if(!len)return;
+      const f=FLOW[fl.kind]||FLOW.signal;
+      const r=(fl.resistance&&RES[fl.resistance])?RES[fl.resistance]:{speed:0.85,count:3};
+      const rad=(p==="bv"?(f.w>=3?3.4:2.6):(f.w>=3?3.6:2.8));
+      for(let k=0;k<r.count;k++){
+        const c=document.createElementNS("http://www.w3.org/2000/svg","circle");
+        c.setAttribute("r",rad);c.setAttribute("fill",p==="bv"?"#fff":f.color);
+        if(p==="bv"){c.setAttribute("stroke",f.color);c.setAttribute("stroke-width","1.4");
+          c.setAttribute("filter","url(#bv-glow)");}
+        pg.appendChild(c);
+        particles.push({path,len,t:k/r.count,speed:r.speed*0.00035,el:c});
+      }
+    });
+  }
+  function place(p){try{const pt=p.path.getPointAtLength(p.t*p.len);
+    p.el.setAttribute("cx",pt.x);p.el.setAttribute("cy",pt.y);}catch(e){}}
+  function tick(ts){if(!playing)return;if(!last)last=ts;const dt=ts-last;last=ts;
+    particles.forEach(p=>{p.t+=p.speed*dt;while(p.t>1)p.t-=1;place(p);});raf=requestAnimationFrame(tick);}
+  function play(){if(!supported||playing)return;playing=true;last=0;
+    document.body.classList.remove("anim-off");raf=requestAnimationFrame(tick);sync();}
+  function pause(){playing=false;cancelAnimationFrame(raf);document.body.classList.add("anim-off");sync();}
+  function sync(){const btn=document.getElementById("playbtn");
+    if(!supported){btn.style.display="none";return;}
+    btn.innerHTML=playing
+      ?`<svg class="ic" viewBox="0 0 9 10"><rect x="0" y="0" width="3" height="10"/><rect x="6" y="0" width="3" height="10"/></svg> 일시정지`
+      :`<svg class="ic" viewBox="0 0 9 10"><path d="M0,0 L9,5 L0,10 Z"/></svg> 재생`;}
+  function rebuild(p){const wasPlaying=playing;cancelAnimationFrame(raf);build(p);
+    particles.forEach(place);if(!supported){document.getElementById("playbtn").style.display="none";
+      document.body.classList.add("anim-off");return;}
+    if(wasPlaying&&!reduceMotion){playing=false;play();}else{sync();}}
+  function init(){
+    build("bv");
+    if(!supported){document.getElementById("playbtn").style.display="none";document.body.classList.add("anim-off");return;}
+    particles.forEach(place);
+    document.getElementById("playbtn").addEventListener("click",()=>playing?pause():play());
+    if(reduceMotion)pause();else play();
+  }
+  return {init,rebuild};
+})();
+Anim.init();
+
+/* 뷰 토글 */
+(function(){
+  const tg=document.getElementById("viewtoggle");
+  tg.addEventListener("click",e=>{const btn=e.target.closest("button");if(!btn)return;
+    const v=btn.dataset.v;
+    tg.querySelectorAll("button").forEach(x=>x.classList.toggle("active",x===btn));
+    if(v==="bv"){BV.svg.removeAttribute("hidden");BLK.svg.setAttribute("hidden","");}
+    else{BLK.svg.removeAttribute("hidden");BV.svg.setAttribute("hidden","");}
+    Anim.rebuild(v);});
+})();
+
+/* 범례 */
+(function(){
+  const used=[...new Set(DATA.flows.map(f=>f.kind))];let html="";
+  used.forEach(k=>{const f=FLOW[k]||FLOW.signal;
+    html+=`<span class="item"><svg width="34" height="10"><line x1="1" y1="5" x2="33" y2="5" stroke="${f.color}" stroke-width="${f.w}" ${f.dash!=="none"?`stroke-dasharray="${f.dash}"`:""}/></svg>${f.label}</span>`;});
+  if(DATA.flows.some(f=>f.resistance))
+    html+=`<span class="item"><span class="rdot"></span>입자 느리고 듬성 = 저항 큼 (R↑)</span>`;
+  if(DATA.blocks.some(b=>b.storage))
+    html+=`<span class="item"><span class="rdot" style="background:none;border:2px solid var(--su-gray)"></span>맥동 ⊙ = 에너지·데이터 체류</span>`;
+  html+=`<span class="item"><span class="badge">추정</span>판독 불확실 — 검증 필요</span>`;
+  document.getElementById("legend").innerHTML=html;
+})();
+
+/* 블록 카드 */
+(function(){
+  const grid=document.getElementById("grid");
+  DATA.blocks.forEach(b=>{const c=col(b.category);
+    const parts=(b.key_parts||[]).map(p=>`<li><span class="ref">${esc(p.ref||"")}</span>
+      <span class="pv">${esc(p.type||"")}${p.value&&p.value!=="-"?` · ${esc(p.value)}`:""}</span>
+      ${isEst(p.confidence)?`<span class="est">추정</span>`:""}</li>`).join("");
+    const div=document.createElement("div");div.className="card";div.id="card-"+b.id;
+    div.innerHTML=`<div class="chead" style="background:${c}"><h3>${esc(b.name)}</h3>
+      ${b.storage?`<span class="store">⊙ 체류</span>`:""}<span class="cat">${esc(b.category)}</span></div>
+      <div class="body"><p class="role">${esc(b.role||"")}</p><p class="plain">${esc(b.plain_explainer||"")}</p>
+      ${parts?`<button class="parts-toggle" aria-expanded="false"><span class="chev">▸</span> 주요 부품 ${b.key_parts.length}개</button>
+        <ul class="parts">${parts}</ul>`:""}</div>`;
+    grid.appendChild(div);});
+  grid.querySelectorAll(".parts-toggle").forEach(btn=>{btn.addEventListener("click",()=>{
+    const open=btn.getAttribute("aria-expanded")==="true";btn.setAttribute("aria-expanded",String(!open));
+    btn.nextElementSibling.classList.toggle("open",!open);});});
+})();
+
+/* 노트 */
+if(DATA.notes&&DATA.notes.length){document.getElementById("notes-host").innerHTML=
+  `<div class="notes"><h3>판독 노트 · 가정</h3><ul>${DATA.notes.map(n=>`<li>${esc(n)}</li>`).join("")}</ul></div>`;}
+
+/* 헬퍼 */
+function jump(id){const el=document.getElementById("card-"+id);if(!el)return;
+  el.scrollIntoView({behavior:"smooth",block:"center"});
+  el.classList.remove("flash");void el.offsetWidth;el.classList.add("flash");}
+</script>
+</body>
+</html>

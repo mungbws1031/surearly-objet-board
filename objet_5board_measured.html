@@ -14,6 +14,11 @@
   .legend{display:flex;flex-wrap:wrap;gap:10px 18px;margin-top:14px;font-size:11px;color:#ccc;}
   .legend span{display:inline-flex;align-items:center;gap:6px;}
   .dot{width:10px;height:10px;border-radius:3px;display:inline-block;}
+  .detail-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:16px;}
+  .card{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;padding:10px 12px;font-size:11.5px;line-height:1.6;}
+  .card h3{margin:0 0 6px;font-size:12.5px;}
+  .card ul{margin:0;padding-left:16px;color:#ccc;}
+  .card ul li{margin-bottom:2px;}
   .notes{margin-top:16px;font-size:11px;color:#999;line-height:1.7;}
   .notes b{color:#ddd;}
   .est{color:#F5A623;font-weight:700;}
@@ -21,10 +26,10 @@
 </head>
 <body>
 <div class="wrap">
-  <h1>Surearly Objet V02 (260710) — 5보드 실측 배치도</h1>
+  <h1>Surearly Objet V02 (260710) — 5보드 실측 배치도 (v2)</h1>
   <div class="sub">
     <b>DXF 좌표 그대로</b> 5개 부품 클러스터를 실측 위치·비율로 배치함(1 unit = 1mm). 회로도가 아니라 <b>PADS 배치 좌표</b> 기반이라
-    이전 회로도 기반 추정과 결과가 다름 — 특히 PCB-Board(전원부)와 LED-Board(광원+검출 통합)는 실측으로 확정된 것.
+    이전 회로도 기반 추정과 결과가 다름. 박스 안엔 레퍼런스만 짧게 표기하고, 상세 부품명은 아래 카드에서 확인.
   </div>
 
 <svg viewBox="-60 -50 300 210" xmlns="http://www.w3.org/2000/svg">
@@ -39,51 +44,47 @@
     <path d="M 130 20 L 150 40 L 91 66"/>
     <path d="M 130.5 20 L 168.3 20" stroke="#888"/>
   </g>
-  <g font-size="4.2" fill="#8fd6ff" font-weight="600">
-    <text x="20" y="24">J1/J2</text>
-    <text x="-38" y="52" fill="#F5A623">J14(추정 경로)</text>
-    <text x="105" y="45">J7/J8↔J9(추정 페어링)</text>
-    <text x="140" y="17" fill="#888">근접 배치(정확한 커넥터 페어 미확인)</text>
+  <g font-size="4" fill="#8fd6ff" font-weight="600">
+    <text x="22" y="24">J1/J2</text>
+    <text x="-40" y="52" fill="#F5A623" font-size="3.3">J14(추정)</text>
+    <text x="98" y="47" font-size="3.3">J7/J8↔J9(추정)</text>
   </g>
 
   <!-- Main-Board -->
   <rect x="76" y="-2.5" width="54.5" height="46.5" rx="1" fill="#1e1e1e" stroke="#2D6CDF" stroke-width="1"/>
-  <text x="79" y="6" font-size="6" font-weight="700" fill="#fff">① Main-Board</text>
-  <text x="79" y="12" font-size="4" fill="#aaa">MCU + 로컬레귤레이터 + 부저</text>
-  <text x="79" y="19" font-size="4" fill="#ddd">U2 STM32U599VIT6</text>
-  <text x="79" y="24" font-size="4" fill="#ddd">U3~U7, Y1/Y2 크리스털</text>
-  <text x="79" y="29" font-size="4" fill="#ddd">BZ1 부저 · J3~J8</text>
-  <text x="79" y="41" font-size="3.5" fill="#666">54.5×46.5mm</text>
+  <text x="79" y="7" font-size="5.5" font-weight="700" fill="#fff">① Main-Board</text>
+  <text x="79" y="14" font-size="3.6" fill="#ddd">U2, U3~U7, Y1, Y2</text>
+  <text x="79" y="19.5" font-size="3.6" fill="#ddd">BZ1, J3~J8</text>
+  <text x="79" y="41" font-size="3.2" fill="#666">54.5×46.5mm</text>
 
   <!-- Power/PCB-Board -->
   <rect x="168.3" y="-3" width="51.2" height="49" rx="1" fill="#1e1e1e" stroke="#E60044" stroke-width="1"/>
-  <text x="171" y="6" font-size="6" font-weight="700" fill="#fff">② PCB-Board(전원부)</text>
-  <text x="171" y="12" font-size="4" fill="#aaa">충전 · 승압 · USB</text>
-  <text x="171" y="19" font-size="4" fill="#ddd">U13 BQ24075(충전)</text>
-  <text x="171" y="24" font-size="4" fill="#ddd">U14 TPS27081, U15 TLV61048</text>
-  <text x="171" y="29" font-size="4" fill="#ddd">J10 USB, J11 배터리, SW2</text>
-  <text x="171" y="44" font-size="3.5" fill="#666">51.2×49mm</text>
+  <text x="171" y="7" font-size="5.5" font-weight="700" fill="#fff">② PCB-Board</text>
+  <text x="171" y="14" font-size="3.6" fill="#aaa">(전원부)</text>
+  <text x="171" y="20.5" font-size="3.6" fill="#ddd">U13, U14, U15</text>
+  <text x="171" y="26" font-size="3.6" fill="#ddd">J10, J11, SW2</text>
+  <text x="171" y="44" font-size="3.2" fill="#666">51.2×49mm</text>
 
   <!-- LCD-Board -->
   <rect x="-29" y="16" width="38.1" height="24.2" rx="1" fill="#1e1e1e" stroke="#C2410C" stroke-width="1"/>
-  <text x="-26" y="21" font-size="5.2" font-weight="700" fill="#fff">③ LCD-Board</text>
-  <text x="-26" y="26" font-size="4" fill="#ddd">U1 BoT-nLE512(BLE)</text>
-  <text x="-26" y="31" font-size="4" fill="#ddd">LCD SPI, Q1, R1~R6</text>
-  <text x="-26" y="38" font-size="3.5" fill="#666">38.1×24.2mm</text>
+  <text x="-27" y="21.5" font-size="4.6" font-weight="700" fill="#fff">③ LCD-Board</text>
+  <text x="-27" y="27" font-size="3.5" fill="#ddd">U1, LCD, Q1</text>
+  <text x="-27" y="32" font-size="3.5" fill="#ddd">R1~R6, BD1</text>
+  <text x="-27" y="38" font-size="3.2" fill="#666">38.1×24.2mm</text>
 
   <!-- Button-Board -->
   <rect x="-7" y="77.3" width="7" height="5.2" rx="0.5" fill="#1e1e1e" stroke="#7B5FC0" stroke-width="0.8"/>
-  <text x="-30" y="90" font-size="5.2" font-weight="700" fill="#fff">④ Button-Board</text>
-  <text x="-30" y="96" font-size="4" fill="#ddd">SW1 + J14 (7×5.2mm, 초소형)</text>
-  <line x1="-3.5" y1="82.5" x2="-25" y2="88" stroke="#7B5FC0" stroke-width="0.5"/>
+  <text x="-35" y="70" font-size="4.6" font-weight="700" fill="#fff">④ Button-Board</text>
+  <text x="-35" y="76" font-size="3.5" fill="#ddd">SW1, J14</text>
+  <text x="-35" y="81" font-size="3.2" fill="#666">7×5.2mm</text>
+  <line x1="-3.5" y1="79.9" x2="-15" y2="76" stroke="#7B5FC0" stroke-width="0.5"/>
 
   <!-- LED-Board -->
   <rect x="63" y="66" width="56" height="30.3" rx="1" fill="#1e1e1e" stroke="#C77800" stroke-width="1"/>
-  <text x="66" y="72" font-size="5.5" font-weight="700" fill="#fff">⑤ LED-Board (광원+검출 통합)</text>
-  <text x="66" y="78" font-size="4" fill="#ddd">D2~D8 UV-LED×7 (365nm)</text>
-  <text x="66" y="83" font-size="4" fill="#ddd">D9~D15 포토다이오드×7</text>
-  <text x="66" y="88" font-size="4" fill="#ddd">U9 TLC5916, U8/U10/U11/U12 OPA4397×4</text>
-  <text x="66" y="93" font-size="3.5" fill="#666">56×30.3mm · J9</text>
+  <text x="66" y="73" font-size="4.8" font-weight="700" fill="#fff">⑤ LED-Board</text>
+  <text x="66" y="80" font-size="3.6" fill="#ddd">D2~D8, D9~D15</text>
+  <text x="66" y="86" font-size="3.6" fill="#ddd">U8,U9,U10,U11,U12</text>
+  <text x="66" y="93" font-size="3.2" fill="#666">56×30.3mm · J9</text>
 
 </svg>
 
@@ -95,11 +96,68 @@
     <span><i class="dot" style="background:#C77800"></i>LED+PD 통합광학</span>
   </div>
 
+  <div class="detail-grid">
+    <div class="card">
+      <h3 style="color:#2D6CDF">① Main-Board</h3>
+      <ul>
+        <li>U2 — STM32U599VIT6 (MCU)</li>
+        <li>Y2 — SX-32, 16MHz 메인클럭</li>
+        <li>Y1 — CS-3215, 32.768kHz (RTC용)</li>
+        <li>U4/U5 — MCP79410-ISN(RTC) / M24C32-RMN6TP(EEPROM)</li>
+        <li>U6 — MX25L3273FM2I-08G-TR (QSPI 플래시)</li>
+        <li>U3 — TLV840MADL29DBVR (로컬 LDO)</li>
+        <li>U7 — TLV75733PDBVR (3.3V LDO)</li>
+        <li>BZ1 — LET4020S-03L (부저), J3~J8</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 style="color:#E60044">② PCB-Board (전원부)</h3>
+      <ul>
+        <li>U13 — BQ24075RGTR (Li-ion 충전)</li>
+        <li>U14 — TPS27081ADDCR (로드 스위치)</li>
+        <li>U15 — TLV61048DBV (부스트 컨버터)</li>
+        <li>J10 — USB4940, J11 — 배터리(53261-02)</li>
+        <li>SW2, L1(2.2µH), D18(SS34FA)</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 style="color:#C2410C">③ LCD-Board</h3>
+      <ul>
+        <li>U1 — BLE 모듈 <span class="est">(회로도=BoT-nLE512 / 데이터시트=BoT-nLE521, 불일치 확인 필요)</span></li>
+        <li>LCD — ZT020Q01, 2.0" TFT 4-wire SPI</li>
+        <li>Q1 — MMBT2222A</li>
+        <li>BD1, R1~R6 — 보호다이오드·지지저항</li>
+        <li>J1/J2 — Main-Board行 FFC</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 style="color:#7B5FC0">④ Button-Board</h3>
+      <ul>
+        <li>SW1 — B3U-1000P (택트 버튼)</li>
+        <li>J14 — 53398-02</li>
+        <li>초소형(7×5.2mm), LCD-Board行 로컬 연결 <span class="est">(추정)</span></li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 style="color:#C77800">⑤ LED-Board (광원+검출 통합)</h3>
+      <ul>
+        <li>D2~D8 — VLMU1610-365-135 ×7 (365nm UV-LED)</li>
+        <li>U9 — TLC5916IPW (정전류 LED 드라이버)</li>
+        <li>D9~D15 — VEMD2503X01 ×7 (포토다이오드)</li>
+        <li>U8,U10 — OPA4397PWR (1단 TIA, 200KΩF)</li>
+        <li>U11,U12 — OPA4397PWR (2단 게인, 19.1K/1KF)</li>
+        <li>J9 — Main-Board行 FFC</li>
+      </ul>
+    </div>
+  </div>
+
   <div class="notes">
     <b>확정(DXF 실측):</b> 5개 클러스터 bbox·부품 레퍼런스 전부 좌표로 확인. Bottom-side 부품(PART_NAME_04 레이어) 포함해서 재검증함.<br>
-    <b>추정(DXF만으론 확인 불가):</b> 커넥터 <span class="est">페어링(어느 J가 어느 J와 실제로 연결되는지)</span>은 배치 좌표만으론 못 확인 — 이건 넷리스트나 케이블 BOM 확인 필요. 위 그림의 J1/J2·J7/J8↔J9·J14 연결선은 "근접 배치+회로도 신호명" 기반 추정.<br>
-    <b>Main↔Power 사이 커넥터</b>는 위치가 붙어있어서(x130.5→168.3, 38mm 갭) 케이블 연결로 보이나 정확히 어느 J넘버인지 회로도에서도 명확히 안 나와 있어 확인 필요.<br>
-    거버 원본(zip)까지 있으면 카파 트레이스로 실제 커넥터 페어링 검증 가능함.
+    <b>확정(거버 4개 카파레이어):</b> 이 보드는 <b>4층 PCB</b> (top / GND plane / VCC plane / bottom).<br>
+    <b>확정(데이터시트):</b> RTC=MCP79410-ISN, EEPROM=M24C32-RMN6TP, QSPI플래시=MX25L3273FM2I-08G-TR, LCD컨트롤러=ZT020Q01, Y2(메인클럭)=SX-32 16MHz, Y1(RTC클럭)=CS-3215 32.768kHz — 전부 이전엔 "레퍼런스 미확인"이었던 항목.<br>
+    <span class="est">주의(거버 fab레이어 시각화 결과):</span> 위 도형은 전부 사각 박스로 단순화했지만, fab.pho 좌표를 찍어보면 최소 2개 보드 구역이 <b>원형/타원형 외곽</b>에 가까움(특히 광학보드 추정 구역). fab레이어엔 텍스트·치수선도 섞여있어 100% 확정은 아니고, 정확한 외곽선은 별도 outline/keepout 레이어나 실제 거버뷰어 확인이 필요함.<br>
+    <span class="est">확인 필요:</span> BLE 모듈 파트넘버가 회로도(BoT-nLE512)와 데이터시트(BoT-nLE521)에서 다름 — 원본 확인 권장.<br>
+    <b>추정(여전히 미확인):</b> 커넥터 페어링(어느 J가 어느 J와 연결되는지)은 넷리스트 확인 필요.
   </div>
 </div>
 </body>
